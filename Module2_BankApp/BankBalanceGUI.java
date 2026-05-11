@@ -4,7 +4,6 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 
 public class BankBalanceGUI extends JFrame implements ActionListener {
-    // GUI Components
     private JPanel panel;
     private JTextField amountField;
     private JLabel balanceLabel;
@@ -13,40 +12,38 @@ public class BankBalanceGUI extends JFrame implements ActionListener {
     private JButton viewBalanceButton;
     private JButton exitButton;
 
-    // Logic Variable
     private double balance = 0.0;
 
     public BankBalanceGUI() {
-        // Set up the Frame
         setTitle("CSU-Global Bank Interface");
-        setSize(400, 250);
+        // Increased height from 250 to 350 to prevent squishing
+        setSize(400, 350); 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Initialize Panel and Layout
         panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 1, 10, 10));
+        // 6 rows, 1 column, with 10px vertical/horizontal gaps
+        panel.setLayout(new GridLayout(6, 1, 10, 10)); 
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Initialize Components
         balanceLabel = new JLabel("Current Balance: $0.00", SwingConstants.CENTER);
-        balanceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        balanceLabel.setFont(new Font("Arial", Font.BOLD, 18));
 
+        // Setting a preferred size for the text field helps VS Code's layout engine
         amountField = new JTextField();
+        amountField.setPreferredSize(new Dimension(200, 30));
         amountField.setBorder(BorderFactory.createTitledBorder("Enter Amount:"));
 
         depositButton = new JButton("Deposit Funds");
         withdrawButton = new JButton("Withdraw Funds");
-        viewBalanceButton = new JButton("Refresh Balance View");
-        exitButton = new JButton("Exit Program");
+        viewBalanceButton = new JButton("View Balance Popup");
+        exitButton = new JButton("Exit");
 
-        // Add Listeners
         depositButton.addActionListener(this);
         withdrawButton.addActionListener(this);
         viewBalanceButton.addActionListener(this);
         exitButton.addActionListener(this);
 
-        // Add to Panel
         panel.add(balanceLabel);
         panel.add(amountField);
         panel.add(depositButton);
@@ -54,43 +51,48 @@ public class BankBalanceGUI extends JFrame implements ActionListener {
         panel.add(viewBalanceButton);
         panel.add(exitButton);
 
-        // Add Panel to Frame
         add(panel);
+        
+        // This ensures you can type immediately without clicking first
+        amountField.requestFocusInWindow(); 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
+            String inputText = amountField.getText().trim();
             double amount = 0;
-            if (!amountField.getText().isEmpty()) {
-                amount = Double.parseDouble(amountField.getText());
+            
+            if (!inputText.isEmpty()) {
+                amount = Double.parseDouble(inputText);
             }
 
             if (e.getSource() == depositButton) {
                 if (amount > 0) {
                     balance += amount;
                     updateBalanceDisplay();
-                    JOptionPane.showMessageDialog(this, "Successfully deposited $" + amount);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Please enter a positive amount to deposit.");
                 }
             } else if (e.getSource() == withdrawButton) {
                 if (amount > 0 && amount <= balance) {
                     balance -= amount;
                     updateBalanceDisplay();
-                    JOptionPane.showMessageDialog(this, "Successfully withdrew $" + amount);
                 } else {
-                    JOptionPane.showMessageDialog(this, "Insufficient funds or invalid amount!");
+                    JOptionPane.showMessageDialog(this, "Invalid amount or Insufficient Funds!");
                 }
             } else if (e.getSource() == viewBalanceButton) {
-                updateBalanceDisplay();
-                JOptionPane.showMessageDialog(this, "Your current balance is: $" + String.format("%.2f", balance));
+                JOptionPane.showMessageDialog(this, "Current Balance: $" + String.format("%.2f", balance));
             } else if (e.getSource() == exitButton) {
-                JOptionPane.showMessageDialog(this, "Final Balance: $" + String.format("%.2f", balance) + "\nThank you for using the Bank App!");
+                JOptionPane.showMessageDialog(this, "Final Balance: $" + String.format("%.2f", balance));
                 System.exit(0);
             }
             
-            amountField.setText(""); // Clear field after action
+            amountField.setText("");
+            amountField.requestFocusInWindow(); // Put cursor back after clicking button
+
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid numeric amount.");
+            JOptionPane.showMessageDialog(this, "Error: Please enter numbers only (e.g. 10.50)");
         }
     }
 
@@ -99,7 +101,6 @@ public class BankBalanceGUI extends JFrame implements ActionListener {
     }
 
     public static void main(String[] args) {
-        // Run GUI in the Event Dispatch Thread for thread safety
         SwingUtilities.invokeLater(() -> {
             new BankBalanceGUI().setVisible(true);
         });
