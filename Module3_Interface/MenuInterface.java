@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -49,18 +48,29 @@ public class MenuInterface extends JFrame {
             textBox.insert("Timestamp: " + dtf.format(LocalDateTime.now()) + "\n", 0);
         });
 
-        // Item 2: The "Guaranteed" Log Logic
-        JMenuItem item2 = new JMenuItem("2. Save to log.txt");
-        item2.addActionListener(e -> {
-            // We use a File object to find out exactly where the file is going
-            File logFile = new File("log.txt");
-            try (FileWriter writer = new FileWriter(logFile, true)) {
-                writer.write(textBox.getText() + "\n---\n");
-                JOptionPane.showMessageDialog(this, "Saved!\nLocation: " + logFile.getAbsolutePath());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "Error writing to file: " + ex.getMessage());
-            }
-        });
+        // Item 2: Write to log.txt
+JMenuItem item2 = new JMenuItem("2. Save to log.txt");
+item2.addActionListener(e -> {
+    // try-with-resources ensures the file is CLOSED and SAVED properly
+    try (FileWriter writer = new FileWriter("log.txt", true)) { 
+        String content = textBox.getText();
+        
+        if (content.equals(PLACEHOLDER) || content.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nothing to save!");
+            return;
+        }
+
+        writer.write(content);
+        writer.write("\n--- End of Entry ---\n"); // Adds a separator
+        
+        // Manual flush just to be 100% safe
+        writer.flush(); 
+        
+        JOptionPane.showMessageDialog(this, "Success! Content pushed to log.txt");
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+    }
+});
 
         // Item 3: Change Color
         JMenuItem item3 = new JMenuItem("3. Change Background");
